@@ -81,8 +81,8 @@ class Vertex():
 	Construct a vertex out of x and y coordinates
 	"""
 	def __init__(self, x, y):
-		self.x = x
-		self.y = y
+		self.x = float(x)
+		self.y = float(y)
 
 	def toString(self):
 		return "(" + str(self.x) + ", " + str(self.y) + ")"

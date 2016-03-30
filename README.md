@@ -41,15 +41,51 @@ Following this format the data file must be saved with the extension ".reg".
 **Loading in the data:** Once the ".reg" file has been made you can click on the file menu item and choose the *Open Data* option.  This will, like the Open Image option, open a file search dialog.  Open up your specified ".reg" file and it will be plotted atop the fits image in the matplotlib figure window.  Below is an example image of what yours may look like.  If it looks messy don't worry you if you are familiar with the matplotlib toolbar you will be able to zoom in.
 
 Example Data Loading Result:
+
 ![alt text](https://github.com/tristan3214/fits-polygon-exclusion/blob/master/data_ex.png)
 
+####Changing Contrast
+The slider can be used to change the contrast of the pixels.  It only sets it once the slider has stopped, and more than likely the option it is already set on is close to the most optimal setting.
 
+####Making Polygons
+First you will want to use the zoom tool given by the matplotlib toolbar so you can close in on the object that you will be drawing your polygon around.  An example of this would be zooming around a large foreground star or background galaxy that is being fitted with PSF stars.  Once zoomed in you will be holding the ctrl button down while clicking around your object to specify the vertices of your polgyon as you go the polygon will be plotted out along the way.  Once you are satisfied with the polygon simply release the ctrl button and the polygon coordinates will be outputed to the read-only text box for visual confirmation.  Below will be an example image of a completed polygon around a target you would want to exclude points from. 
 
+**IMPORTANT:** Currently the way you draw your polygon you must release ctrl to complete your polygon rather than closing your polygon with another specified point.  For example, if I were to create a box around a target I specify three points with the mouse and then release ctrl to close the polgyon up by connecting to the first point.  This is an unintuitive functionality that will be resolved in the future.
+
+If say you messed up the making of your polygon or you are not satisfied with the results and just want to simply redraw it.  You will have the chance to undo the polygon you made with the undo functionality under the edit menu.  Any undos you do can be redrawn as well with a click of the redo.  However, the moment you start creating a new polygon the redo will be reset.  You will be allowed to effectively undo all the drawn polygons and redo all of them assuming you don't start drawing a new one.
+
+####Saving Polygons
+Once you have all your necessary polygons you can go to the file menu and click on *Save Polys* and it will prompt you with a name and desitnation to save in.  This will output all your vertices as x and y delimted by white space for each float.
+
+Example polygon:
+
+![alt text](url)
+
+### Encapsulating The Polygons
+The next bit of code is held within **pointCross.py**.  Within it are classes that handle the encapsulation of a polygon given a list of vertices written as tuples of (x, y).
+
+#### Conducting encapsulation
+For convenience, one can use the provided method in **pointCross.py** called *getPolygons* that will take a path string to your MakePolygon.py polygon file and will return a list of Polygon objects.  
+
+To encapsulate polygons by yourself just load in the polygon file making each line as a list of vertices written as tuples of (x, y).  To instantiate a Polygon instance simple do the following: `var = pointCross.Polygon(points)`.  This will give you a Polygon object that you can store in a data structure.  The pointCross is there because you will need to import the py file to access the class, that looks like `import pointCross` assuming the py file is in the current directory.
+
+Now say you have some point that has x and y coordinates corresponding to your fits image you can feed the instance function in the polygon to determine whether it is held within the polygon.  This instance function is the "isInside" method.  You will feed this method a point given as a tuple and it will return a boolean value of whether it is containted in the polygon.  A call of this method would look something like the following: `poly.isInside(point)`.  
+
+#### How it works
+The algorithm in play to determine whether a point is contained in a polygon is called the even-odd rule.  This is part of a larger problem class known as *point-in-polygon* which has other various algorithms to take on this problem.  However, with the precision fits images give you in x and y coordinates the even-odd rule is plenty effective.
+
+The idea behind it is that we draw a line segment to the right of the point and if it intersects and odd number of times with a polygons edges then it is contained within it, and vice-versa for an even number of collisions.
+
+Here is a more information on the problem space: <https://en.wikipedia.org/wiki/Point_in_polygon>
 
 #Shortcomings
 
 
 
 #Features To Work In
+* Undoing polygon vertices as one is in the progress of drawing them.
+* Solving the issue of faster image load times, starting with the reduction of precision.
+
+
 
 
