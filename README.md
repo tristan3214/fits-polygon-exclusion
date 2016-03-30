@@ -59,7 +59,7 @@ Once you have all your necessary polygons you can go to the file menu and click 
 
 Example polygon:
 
-![alt text](url)
+![alt text](https://github.com/tristan3214/fits-polygon-exclusion/blob/master/polygon_ex.png)
 
 ### Encapsulating The Polygons
 The next bit of code is held within **pointCross.py**.  Within it are classes that handle the encapsulation of a polygon given a list of vertices written as tuples of (x, y).
@@ -85,7 +85,7 @@ Here is a more information on the problem space: <https://en.wikipedia.org/wiki/
 #Features To Work In
 * Undoing polygon vertices as one is in the progress of drawing them.
 * Solving the issue of faster image load times, starting with the reduction of precision.
-
+* Add better source code in-line documentation.
 
 
 
