@@ -13,6 +13,13 @@ The above code was made with the following Python libraries:
 
 ###Making A Polygon
 
+####Synopsis
+There are two ways to make a polygon, by hand or using the supplied GUI to draw one on (note the dependencies for the latter case).  The first thing to consider when making a polygon is to consider the coordinates being used.  The GUI will only output in the image X and Y pixel coords but can be easily transformed to RA and DEC using astropy.
+
+For the purpose of X and Y as well as RA and DEC they are essentially flat against the FITS image making the code compatibale across both types.  However, if you were to generate points to make in a polygon one needs to take care about the coordinates.  For, example generating a circle in RA and DEC versus hand making one requires a transformation.
+
+Skip to "Encapsulating the Polygon" section for details on how to use the work horse of this code.
+
 ####Running it
 First you need to run MakePolygon.py with `python MakePolygon.py`.  The application will open up with an empty matplotlib figure box, the matplotlib toolbar, a file and edit menu, a contrast slider, and a read-only text box.
 
@@ -62,6 +69,7 @@ Example polygon:
 ![alt text](https://github.com/tristan3214/fits-polygon-exclusion/blob/master/polygon_ex.png)
 
 ### Encapsulating The Polygons
+
 The next bit of code is held within **pointCross.py**.  Within it are classes that handle the encapsulation of a polygon given a list of vertices written as tuples of (x, y).
 
 #### Conducting encapsulation
@@ -71,6 +79,55 @@ To encapsulate polygons by yourself just load in the polygon file making each li
 
 Now say you have some point that has x and y coordinates corresponding to your fits image you can feed the instance function in the polygon to determine whether it is held within the polygon.  This instance function is the "isInside" method.  You will feed this method a point given as a tuple and it will return a boolean value of whether it is containted in the polygon.  A call of this method would look something like the following: `poly.isInside(point)`.  
 
+####Examples
+#####Determining if a point resides in a polygon
+```python
+vertices = [] # will hold tuples representing the x and y coordinates (i.e. (x, y) or (ra, dec))
+# Making a 5 x 5 square by adding the vertices of this polygon
+vertices.append((0,0)) # Vertex 1
+vertices.append((0,5)) # Vertex 2
+vertices.append((5,5)) # Vertex 3
+vertices.append((5,0)) # Vertex 4
+
+# Make the polygon now that we have made our points.
+square = pointCross.Polygon(vertices)
+
+# Define some point, as a tuple of (x, y), that is inside the square.
+point = (1, 3)
+
+print(poly.isInside(point))
+
+"""
+The above line will return a boolean and so can easily be used in an if statement.  In this case
+I print the boolean and it will come out to be True.
+"""
+```
+#####Determining if polygons overlap
+```python
+# I am going to make two squares this time.
+vertices = [] # will hold tuples representing the x and y coordinates (i.e. (x, y) or (ra, dec))
+
+# Making a 5 x 5 square by adding the vertices of this polygon
+vertices.append((0,0)) # Vertex 1
+vertices.append((0,5)) # Vertex 2
+vertices.append((5,5)) # Vertex 3
+vertices.append((5,0)) # Vertex 4
+
+# Make the polygon now that we have made our points.
+square1 = pointCross.Polygon(vertices)
+
+square2 = pointCross.Polygon([(1,1), (6, 1), (6, -4), (1, -4)])
+
+print(square2.isInsidePolygon(square1))
+
+"""
+The above line deconstructs square2 in a set of points and checks if they are inside square1.
+"""
+
+```
+
+
+
 #### How it works
 The algorithm in play to determine whether a point is contained in a polygon is called the even-odd rule.  This is part of a larger problem class known as *point-in-polygon* which has other various algorithms to take on this problem.  However, with the precision fits images give you in x and y coordinates the even-odd rule is plenty effective.
 
@@ -79,7 +136,7 @@ The idea behind it is that we draw a line segment to the right of the point and 
 Here is a more information on the problem space: <https://en.wikipedia.org/wiki/Point_in_polygon>
 
 #Shortcomings
-
+When checking for overlapping polygons if a larger square's edge cuts through a smaller square and you check that the larger one is in the small one, in this case, it will not work.  You have to choose the polygon that you know will be in the other one as the object to call ".isInsidePolygon()".
 
 
 #Features To Work In
