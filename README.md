@@ -123,7 +123,24 @@ print(square2.isInsidePolygon(square1))
 """
 The above line deconstructs square2 in a set of points and checks if they are inside square1.
 """
+```
 
+#####Using text file to store polygons
+One can store polygon coordinates as a text file with each x/y coord being delimited by what space.
+**Format**
+One polygon per line
+```
+vertex1_x vertex1_y vertex2_x vertex2_y vertex3_x vertex3_y vertex4_x vertex4_y
+...
+vertexN_x vertexN_y vertexN_x vertexN_y vertexN_x vertexN_y vertexN_x vertexN_y
+```
+
+To load in the above file (call it squares.txt) use the convenience function "getPolygons"
+```python
+# Say the file is loaded with squares.
+squares = pointCross.getPolygons("squares.txt")
+
+# The above gives me a list of Polygon objects that I can use to iterate through.
 ```
 
 
