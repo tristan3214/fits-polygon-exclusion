@@ -10,6 +10,7 @@ import wx
 import AddLinearSpacer as als
 import os.path
 import copy
+import time as t
 
 class ImageWindow(wx.Frame):
 
@@ -17,10 +18,6 @@ class ImageWindow(wx.Frame):
         wx.Frame.__init__(self, None, -1, "ImageWindow", size=(650,550))
         
         panel = wx.Panel(self)
-
-        #self.image = "13461_NGC-300-OUTER-1U_F606W_drz.fits.gz"
-
-
 
         ## Menu
         self.menuBar = wx.MenuBar()
@@ -123,6 +120,7 @@ class ImageWindow(wx.Frame):
             self.isPlot = True
             self.im.refresh()
             self.devSlider.SetValue(600)
+        self.restart()
     
     def onDataOpen(self, event):
         openFileDialog = wx.FileDialog(self, "Open Data File", "", "", "Data (*.reg)|*.reg", wx.FD_OPEN| wx.FD_FILE_MUST_EXIST)
@@ -132,8 +130,9 @@ class ImageWindow(wx.Frame):
         fileName = openFileDialog.GetFilename()
         
         if "reg" in fileName.split("."):
-            shape, x, y, size = np.genfromtxt(fileName, usecols=[0,1,2,3], unpack=True)
+            shape, x, y, size = np.genfromtxt(openFileDialog.GetPath(), usecols=[0,1,2,3], unpack=True)
             self.im.plotData(x, y, size, shape)
+        #kself.restart()
             
     def onSave(self, event):
         saveFileDialog = wx.FileDialog(self, "Save into polygon file", "", "", "poly file (*.txt)|*.txt", wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
@@ -151,6 +150,7 @@ class ImageWindow(wx.Frame):
             f.write("\n")
 
         f.close()
+        self.restart()
         
     def onUndo(self, event):
         current = self.polyUndo.pop()
@@ -190,7 +190,33 @@ class ImageWindow(wx.Frame):
             string += str(s) + "\n\n"
         self.txtCtrl.SetValue(string)
         
+    def restart(self):
+        # empty undos
+        del self.polyUndo[:]
+        del self.linesUndo[:]
+
+        # empty redos
+        del self.polyRedo[:]
+        del self.linesRedo[:]
+
+        # empty polyStack
+        del self.im.polygonStack[:]
+
+        # empty currentLines
+        self.im.toggleLines(self.im.currentLines, False)
+        del self.im.currentLines[:]
+        del self.im.currentPoly[:]
         
+        # empty lineCollection
+        for lines in self.im.lineCollection:
+            self.im.toggleLines(lines, False)
+        
+        del self.im.lineCollection[:]
+
+        self.txtCtrl.SetValue("")
+        self.editMenu.Enable(2001, False)
+        self.editMenu.Enable(2002, False)
+
 
 class DrawImage(wx.Panel):
 
@@ -236,7 +262,8 @@ class DrawImage(wx.Panel):
         self.Fit()
 
     def plotImage(self, data, scale, cmap):
-        
+        timer = 0
+        timer -= t.clock()
         self.median = np.median(data.flat)
 
         self.mad = np.median(np.abs(data.flat-self.median))
@@ -248,6 +275,8 @@ class DrawImage(wx.Panel):
         self.plot.set_clim(vmin=self.lower, vmax=self.upper)
         self.plot.set_cmap(cmap)
         self.figure.tight_layout()
+        timer += t.clock()
+        print "Plotting took %f seconds"%timer
 
     def plotData(self, x, y, size, shape):
         self.axes.scatter(x,y, s=size+5, marker='o', facecolor='none', edgecolors='lime')
@@ -321,7 +350,12 @@ class DrawImage(wx.Panel):
         self.canvas.Refresh()
 
     def getData(self, image):
-        return fits.getdata(image)
+        timer = 0
+        timer -= t.clock()
+        data = fits.getdata(image, dtype=np.uint8)
+        timer += t.clock()
+        print "Get data took %f seconds"%timer
+        return data
 
     def updateStats(self, data):
         self.median = np.median(data.flat)

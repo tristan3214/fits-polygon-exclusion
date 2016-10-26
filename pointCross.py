@@ -41,6 +41,16 @@ class Polygon():
 		else:
 			return False
 
+        def isInsidePolygon(self, poly):
+                # get list of this polygon's vertices.
+                vertices = []
+                for e in self.edges:
+                        vertices.append(e.vi)
+
+                for v in vertices: # if any vertex is in the other polygon then they are overlapping
+                        if poly.isInside((v.x, v.y)):
+                                return True
+                return False
 
 	def getSize(self):
 		return len(self.edges)
@@ -100,3 +110,37 @@ def getPolygons(fileName):
                         points.append((float(line[xy]), float(line[xy + 1])))
                 polygons.append(Polygon(points))
         return polygons
+
+def inPolygons(polygons, X, Y):
+        for poly in polygons:
+                if poly.isInside((X,Y)):
+                        return True
+                
+        return False
+
+def decDecimalDegrees(dec):
+    """
+    Takes in a declination in the standard format of Dec coordinate (deg:arcmin:arcsec.XX)
+    """
+    dec = dec.split(":")
+    decimal = 0
+    if (float(dec[0]) > 0):
+        decimal = float(dec[0]) + float(dec[1])/60.0 + float(dec[2])/3600.0
+    else:
+        decimal = float(dec[0]) - float(dec[1])/60.0 - float(dec[2])/3600.0
+
+    return decimal
+
+def raDecimalDegrees(ra):
+    """
+    Takes in an RA in the standard format of an RA coordinate (hour:min:sec.XX).
+    This is then converted to decimal degrees (15 deg / hour).
+    """
+    ra = ra.split(":")
+    return 15.0 * (float(ra[0]) + float(ra[1])/60.0 + float(ra[2])/3600.0)
+
+
+
+
+
+
